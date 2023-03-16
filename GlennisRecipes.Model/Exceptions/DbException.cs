@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace GlennisRecipes.Model.Exceptions
 {
-    public class EntityNotFoundException : Exception
+    public class DbException : Exception
     {
         public int? ErrorCode { get; set; }
 
-        public EntityNotFoundException(string message, int? errorCode = null) : base(message)
+        public DbException(string message, int? errorCode = null) : base(message)
         {
             this.ErrorCode = errorCode;
         }
-        public EntityNotFoundException(List<string> message, int? errorCode = null) : base(string.Join(Environment.NewLine, message))
+        public DbException(List<string> message, int? errorCode = null) : base(string.Join(Environment.NewLine, message))
         {
             ErrorCode = errorCode;
         }

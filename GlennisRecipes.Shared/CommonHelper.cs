@@ -16,6 +16,8 @@ namespace GlennisRecipes.Shared
                 paginationData.Page = (itemCount / paginationData.ItemPerPage) + 1;
             }
 
+            paginationData.Total = itemCount;
+
             return paginationData;
         }
     }

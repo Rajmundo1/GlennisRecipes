@@ -20,14 +20,15 @@ namespace GlennisRecipes.DAL
         public DbSet<UserComment> UserComments { get; set; }
         public DbSet<UserRating> UserRatings { get; set; }
 
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
+        //public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        //{
 
-        }
+        //}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.EnableSensitiveDataLogging();
+            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB; Database=GlennisRecipes; Integrated Security=True; Connect Timeout=180");
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -160,8 +161,9 @@ namespace GlennisRecipes.DAL
                 Id = "6d721ff4-8c3e-4d01-9ae9-a80310ecd988",
                 Comment = "This cake was amazing !!!!!",
                 RecipeId = redVelvetCake.Id,
-                UserId = jakeUser.Id
-            };
+                UserId = jakeUser.Id,
+                TimeStamp = DateTime.Parse("3/15/2023 10:37:50 PM"),
+        };
 
             var normalRole = new IdentityRole
             {
