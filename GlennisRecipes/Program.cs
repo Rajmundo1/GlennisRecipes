@@ -36,8 +36,10 @@ builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
 
 builder.Services.AddAutoMapper(typeof(MapperProfiles));
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("GlennisRecipesDb")));
+//builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("GlennisRecipesDb")));
+builder.Services.AddDbContext<ApplicationDbContext>();
 
+//builder.Services.AddScoped<DbContext, ApplicationDbContext>();
 builder.Services.AddScoped<IUserStore<User>, ApplicationUserStore>();
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
@@ -119,12 +121,13 @@ app.UseSerilogRequestLogging(options =>
 });
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-    Path.Combine(builder.Environment.ContentRootPath, "wwwroot/images")),
-    RequestPath = "/images"
-});
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//    FileProvider = new PhysicalFileProvider(
+//    Path.Combine(builder.Environment.ContentRootPath, "wwwroot/images")),
+//    RequestPath = "/images"
+//});
+app.UseStaticFiles();
 
 app.UseRouting();
 
