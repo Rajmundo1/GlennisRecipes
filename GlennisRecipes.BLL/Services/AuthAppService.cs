@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -40,14 +41,16 @@ namespace GlennisRecipes.BLL.Services
 
         public async Task<TokenViewModel> Login(LoginViewModel loginDto)
         {
-            var result = await signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, true, false);
+            var storedUser = await userManager.FindByEmailAsync(loginDto.Email);
+            if(storedUser == null)
+                throw new AuthException("Wrong username or password");
+            var result = await signInManager.PasswordSignInAsync(storedUser.UserName, loginDto.Password, true, false);
             if (result.Succeeded)
             {
-                var user = await userManager.FindByEmailAsync(loginDto.Email);
                 return new TokenViewModel
                 {
-                    AccessToken = await tokenService.CreateNormalAccessToken(user),
-                    RefreshToken = await tokenService.CreateNormalRefreshTokenAsync(user)
+                    AccessToken = await tokenService.CreateNormalAccessToken(storedUser),
+                    RefreshToken = await tokenService.CreateNormalRefreshTokenAsync(storedUser)
                 };
             }
             throw new AuthException("Wrong username or password");

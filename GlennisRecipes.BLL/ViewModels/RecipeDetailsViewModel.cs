@@ -16,6 +16,7 @@ namespace GlennisRecipes.BLL.ViewModels
         public string OwnerName { get; set; }
 
         public double OverallRatings { get; set; }
+        public int AllRatings { get; set; }
         public int OwnRating { get; set; }
         public List<UserCommentViewModel> UserComments { get; set; }
     }

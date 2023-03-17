@@ -45,6 +45,8 @@ namespace GlennisRecipes.DAL.Repositories
                 Id = Guid.NewGuid().ToString(),
                 UserName = registerData.UserName,
                 NormalizedUserName = registerData.UserName,
+                Email = registerData.Email,
+                NormalizedEmail = registerData.Email,
             };
             try
             {

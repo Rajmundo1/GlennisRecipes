@@ -58,13 +58,30 @@ namespace GlennisRecipes.DAL.Repositories
             return newRecipe;
         }
 
-        public async Task<Recipe> UpdateRecipeAsync(Recipe recipe)
+        public async Task DeletePictureFileAsync(string recipeId, string rootPath)
+        {
+            var storedRecipe = await GetRecipeAsync(recipeId);
+
+            var fullPath = Path.Combine(rootPath, storedRecipe.ImagePath);
+            if (File.Exists(fullPath))
+            {
+                File.Delete(fullPath);
+                storedRecipe.ImagePath = "";
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task<Recipe> UpdateRecipeAsync(Recipe recipe, string imagePath = null)
         {
             var storedRecipe = await GetRecipeAsync(recipe.Id);
 
             storedRecipe.Instructions = recipe.Instructions;
             storedRecipe.Name = recipe.Name;
-            storedRecipe.ImagePath = recipe.ImagePath;
+
+            if (!string.IsNullOrEmpty(imagePath))
+            {
+                storedRecipe.ImagePath = imagePath;
+            }
 
             await dbContext.SaveChangesAsync();
 
@@ -133,7 +150,6 @@ namespace GlennisRecipes.DAL.Repositories
             else
             {
                 pagedRecipes = await dbContext.Recipes
-                    .Where(recipe => recipe.Name.Contains(searchString))
                     .Skip((paginationData.Page - 1) * paginationData.ItemPerPage)
                     .Take(paginationData.ItemPerPage)
                     .ToListAsync();
@@ -155,6 +171,7 @@ namespace GlennisRecipes.DAL.Repositories
             if (recipe == null)
                 throw new DbException("Content not found");
 
+            recipe.UserComments = recipe.UserComments.OrderByDescending(comment => comment.TimeStamp).ToList();
             return recipe;
         }
 

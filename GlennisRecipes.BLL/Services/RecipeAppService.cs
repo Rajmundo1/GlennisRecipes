@@ -34,7 +34,7 @@ namespace GlennisRecipes.BLL.Services
 
         public async Task<(List<RecipeViewModel>, PaginationData)> GetRecipesAsync(PaginationData paginationData, string searchString = null)
         {
-            var recipes = await recipeRepository.GetRecipesAsync(paginationData);
+            var recipes = await recipeRepository.GetRecipesAsync(paginationData, searchString);
 
             var recipeViewModels = mapper.Map<List<RecipeViewModel>>(recipes.Item1);
 
@@ -50,11 +50,12 @@ namespace GlennisRecipes.BLL.Services
             return (recipeViewModels, paginationData);
         }
 
-        public async Task<RecipeDetailsViewModel> UpdateRecipeAsync(RecipeDetailsViewModel recipeDetailsViewModel)
+        public async Task<RecipeDetailsViewModel> UpdateRecipeAsync(string recipeId, RecipeEditViewModel recipeEditViewModel, string imagePath = null)
         {
-            var recipe = mapper.Map<Recipe>(recipeDetailsViewModel);
+            var recipe = mapper.Map<Recipe>(recipeEditViewModel);
+            recipe.Id = recipeId;
 
-            await recipeRepository.UpdateRecipeAsync(recipe);
+            await recipeRepository.UpdateRecipeAsync(recipe, imagePath);
 
             return mapper.Map<RecipeDetailsViewModel>(await recipeRepository.GetRecipeAsync(recipe.Id));
         }
@@ -70,12 +71,14 @@ namespace GlennisRecipes.BLL.Services
             if(recipe.UserRatings.Count() != 0)
             {
                 var allRatings = recipe.UserRatings;
-                recipeDetailsViewModel.OverallRatings = recipe.UserRatings.Sum(r => (int)r.Rating) / recipe.UserRatings.Count();
+                recipeDetailsViewModel.OverallRatings = Math.Round((recipe.UserRatings.Sum(r => (int)r.Rating) / (double)recipe.UserRatings.Count()),2);
             }
             else
             {
                 recipeDetailsViewModel.OverallRatings = 0;
             }
+
+            recipeDetailsViewModel.AllRatings = recipe.UserRatings.Count();
 
             if (userId == null)
                 recipeDetailsViewModel.OwnRating = 0;
@@ -95,12 +98,12 @@ namespace GlennisRecipes.BLL.Services
             return recipeDetailsViewModel;
         }
 
-        public async Task<CreateRecipeViewModel> CreateNewRecipeAsync(CreateRecipeViewModel createRecipeViewModel, string userId)
+        public async Task<CreateRecipeViewModel> CreateNewRecipeAsync(CreateRecipeViewModel createRecipeViewModel, string userId, string imagePath)
         {
             var recipe = new Recipe
             {
                 Id = Guid.NewGuid().ToString(),
-                ImagePath = createRecipeViewModel.ImagePath,
+                ImagePath = imagePath,
                 Instructions = createRecipeViewModel.Instructions,
                 Name = createRecipeViewModel.Name,
                 OwnerId = userId                
@@ -109,6 +112,11 @@ namespace GlennisRecipes.BLL.Services
             await recipeRepository.CreateNewRecipeAsync(recipe);
 
             return createRecipeViewModel;
+        }
+
+        public async Task DeletePictureFileAsync(string recipeId, string rootPath)
+        {
+            await recipeRepository.DeletePictureFileAsync(recipeId, rootPath);
         }
 
         public async Task<UserComment> CommentOnRecipe(string userId, string recipeId, string comment)

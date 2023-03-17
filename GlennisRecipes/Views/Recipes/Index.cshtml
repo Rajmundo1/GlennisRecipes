@@ -4,52 +4,28 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-@*    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Instructions)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImagePath)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Owner)
-            </th>
-            <th></th>
-        </tr>
-    </thead>*@
-    <tbody>
-
-    <div class="container">
-        <div class="column">
-@foreach (var item in Model) {
-
-            <div class="col-xs-4">
-                <tr>
-                    <div class="container">
-                        <td>
-                            <img src="@(@"images\" + item.ImagePath)" />
-                            @Html.DisplayFor(modelItem => item.Name)
-                            <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-                        </td>
-                    </div>
-@*                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                         |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                    </td>*@
-                </tr>
+<div class="container py-4 py-xl-5">
+    <div class="row mb-5">
+        <div class="col-md-8 cold-xl-6 text-center mx-auto">
+            <h2>Recipes</h2>
+        </div>
+        <form id="search-form" asp-action="Index" method="get">
+            <div class="form-outline w-100 form-group">
+                <input name="searchString" class="form-control" id="searchString" style="background: #fff;" form="search-form" placeholder="Search...(@Model.Count() Recipes)"></input>
             </div>
-}       </div>
+        </form>
     </div>
-    </tbody>
-</table>
+    <div class="row gy-4 row-cols-1 row-colscol-md-2 row-cols-xl-3">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="card align-items-center">
+                    <img class="card-img-top-100 d-block fit-cover" style="height: 250px;" src="~/images/@item.ImagePath"/>
+                    <div class="card-body p-4">
+                        <a class="card-title" asp-action="Details" asp-route-id="@item.Id"> @item.Name </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

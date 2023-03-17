@@ -20,6 +20,8 @@ namespace GlennisRecipes.BLL
             CreateMap<UserComment, UserCommentViewModel>()
                 .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.User.UserName));
             CreateMap<RegisterViewModel, RegisterData>();
+            CreateMap<RecipeEditViewModel, Recipe>();
+            CreateMap<RecipeDetailsViewModel,RecipeEditViewModel>();
 
         }
     }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GlennisRecipes.BLL.ViewModels
 {
-    public class CreateRecipeViewModel
+    public class RecipeEditViewModel
     {
         public string Name { get; set; }
         public string Instructions { get; set; }

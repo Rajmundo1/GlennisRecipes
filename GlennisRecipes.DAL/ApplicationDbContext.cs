@@ -53,9 +53,9 @@ namespace GlennisRecipes.DAL
             {
                 Id = "a8b93270-4150-4411-a54b-6521de4a49aa",
                 Email = "chefjoe@mail.com",
-                NormalizedEmail = "chefjoe@mail.com",
+                NormalizedEmail = "CHEFJOE@MAIL.COM",
                 UserName = "Chef Joe",
-                NormalizedUserName = "Chef Joe",
+                NormalizedUserName = "CHEF JOE",
             };
             chefJoeUser.PasswordHash = passwordHasher.HashPassword(chefJoeUser, "Password1$");
 
@@ -63,9 +63,9 @@ namespace GlennisRecipes.DAL
             {
                 Id = "81139b48-6c24-4fc8-ad72-6c1423608d83",
                 Email = "bakerpeter@mail.com",
-                NormalizedEmail = "bakerpeter@mail.com",
+                NormalizedEmail = "BAKERPETER@MAIL.COM",
                 UserName = "Baker Peter",
-                NormalizedUserName = "Baker Peter",
+                NormalizedUserName = "BAKER PETER",
             };
             bakerPeterUser.PasswordHash = passwordHasher.HashPassword(bakerPeterUser, "Password1$");
 
@@ -73,9 +73,9 @@ namespace GlennisRecipes.DAL
             {
                 Id = "b295bea7-efc3-42a7-8e26-ea3fd5c99ec6",
                 Email = "jake@mail.com",
-                NormalizedEmail = "jake@mail.com",
+                NormalizedEmail = "JAKE@MAIL.COM",
                 UserName = "Jake",
-                NormalizedUserName = "Jake",
+                NormalizedUserName = "JAKE",
             };
             jakeUser.PasswordHash = passwordHasher.HashPassword(jakeUser, "Password1$");
 
@@ -83,9 +83,9 @@ namespace GlennisRecipes.DAL
             {
                 Id = "7a0f0fc8-de75-4231-bca4-f02595b8fc22",
                 Email = "jill@mail.com",
-                NormalizedEmail = "jill@mail.com",
+                NormalizedEmail = "JILL@MAIL.COM",
                 UserName = "Jill",
-                NormalizedUserName = "Jill",
+                NormalizedUserName = "JILL",
             };
             jillUser.PasswordHash = passwordHasher.HashPassword(jillUser, "Password1$");
 

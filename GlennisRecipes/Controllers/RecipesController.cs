@@ -13,6 +13,10 @@ using GlennisRecipes.Model.Interfaces;
 using GlennisRecipes.BLL.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using GlennisRecipes.Model.Enums;
+using Microsoft.AspNetCore.Identity;
+using AutoMapper;
+using Microsoft.Extensions.Hosting.Internal;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace GlennisRecipes.Controllers
 {
@@ -21,21 +25,28 @@ namespace GlennisRecipes.Controllers
         private readonly IRecipeAppService recipeAppService;
         private readonly IIdentityService identityService;
         private readonly IAuthAppService authAppService;
+        private readonly IMapper mapper;
+        private readonly IWebHostEnvironment webHostEnvironment;
+
 
 
         public RecipesController(IRecipeAppService recipeAppService,
                                     IIdentityService identityService,
-                                    IAuthAppService authAppService)
+                                    IAuthAppService authAppService,
+                                    IMapper mapper,
+                                    IWebHostEnvironment webHostEnvironment)
         {
             this.recipeAppService = recipeAppService;
             this.identityService = identityService;
             this.authAppService = authAppService;
-        }
+            this.mapper = mapper;
+            this.webHostEnvironment = webHostEnvironment;
+         }
 
         //GET: Recipes
         public async Task<IActionResult> Index(string searchString)
         {
-            var recipes = await recipeAppService.GetRecipesAsync(new PaginationData { ItemPerPage = 100, Page = 1 });
+            var recipes = await recipeAppService.GetRecipesAsync(new PaginationData { ItemPerPage = 100, Page = 1 }, searchString);
             return View(recipes.Item1);
         }
 
@@ -72,12 +83,20 @@ namespace GlennisRecipes.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Instructions,ImagePath")] CreateRecipeViewModel recipe)
+        public async Task<IActionResult> Create([Bind("Name,Instructions")] CreateRecipeViewModel recipe, IFormFile file)
         {
-            if (ModelState.IsValid)
+
+            if (ModelState.IsValid && file != null && file.Length > 0 && file.ContentType.Contains("image"))
             {
+                var fileName = Guid.NewGuid().ToString() + file.FileName;
+                var filePath = Path.Combine(webHostEnvironment.WebRootPath, "images", fileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
                 var userId = await identityService.GetCurrentUserIdAsync();
-                await recipeAppService.CreateNewRecipeAsync(recipe, userId);
+                await recipeAppService.CreateNewRecipeAsync(recipe, userId, fileName);
                 return RedirectToAction(nameof(Index));
             }
             return View(recipe);
@@ -98,6 +117,10 @@ namespace GlennisRecipes.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Comment(string recipeId, string comment)
         {
+            if (string.IsNullOrEmpty(comment))
+            {
+                return RedirectToAction("Details", new { id = recipeId });
+            }
             var userId = await identityService.GetCurrentUserIdAsync();
             await recipeAppService.CommentOnRecipe(userId, recipeId, comment);
             return RedirectToAction("Details", new { id = recipeId });
@@ -117,7 +140,7 @@ namespace GlennisRecipes.Controllers
             {
                 return NotFound();
             }
-            return View(recipeDetails);
+            return View(mapper.Map<RecipeEditViewModel>(recipeDetails));
         }
 
         // POST: Recipes/Edit/5
@@ -126,19 +149,30 @@ namespace GlennisRecipes.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Name,Instructions,ImagePath")] RecipeDetailsViewModel recipeDetailsViewModel)
+        public async Task<IActionResult> Edit(string id, [Bind("Name,Instructions")] RecipeEditViewModel recipeEditViewModel, IFormFile file)
         {
-            if (id != recipeDetailsViewModel.Id)
+            var modelStates = ModelState.Values.ToList();
+            if (modelStates[0].ValidationState == ModelValidationState.Valid &&
+                modelStates[2].ValidationState == ModelValidationState.Valid &&
+                modelStates[3].ValidationState == ModelValidationState.Valid)
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                await recipeAppService.UpdateRecipeAsync(recipeDetailsViewModel);
+                if(file != null && file.Length > 0 && file.ContentType.Contains("image"))
+                {
+                    var fileName = Guid.NewGuid().ToString() + file.FileName;
+                    var filePath = Path.Combine(webHostEnvironment.WebRootPath, "images", fileName);
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
+                    var rootPath = Path.Combine(webHostEnvironment.WebRootPath, "images");
+                    await recipeAppService.DeletePictureFileAsync(id, rootPath);
+                    await recipeAppService.UpdateRecipeAsync(id, recipeEditViewModel, fileName);
+                    return RedirectToAction(nameof(Index));
+                }
+                await recipeAppService.UpdateRecipeAsync(id, recipeEditViewModel);
                 return RedirectToAction(nameof(Index));
             }
-            return View(recipeDetailsViewModel);
+            return View(recipeEditViewModel);
         }
 
         public IActionResult Login()
@@ -165,7 +199,7 @@ namespace GlennisRecipes.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register([Bind("Email,Password,UserName")]RegisterViewModel registerViewModel)
+        public async Task<IActionResult> Register([Bind("UserName,Email,Password")]RegisterViewModel registerViewModel)
         {
             if (ModelState.IsValid)
             {
@@ -182,8 +216,6 @@ namespace GlennisRecipes.Controllers
             await authAppService.Logout();
             return RedirectToAction(nameof(Index));
         }
-
-        
 
         #region Delete Auto Generated
         //// GET: Recipes/Delete/5

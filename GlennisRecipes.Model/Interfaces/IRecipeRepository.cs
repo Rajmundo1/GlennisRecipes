@@ -20,6 +20,7 @@ namespace GlennisRecipes.Model.Interfaces
         Task<List<UserComment>> GetAllCommentsForRecipeAsync(string recipeId);
         Task<UserRating> RateRecipeAsync(string userId, string recipeId, RatingEnum rating);
         Task<UserComment> CommentOnRecipeAsync(string userId, string recipeId, string comment);
-        Task<Recipe> UpdateRecipeAsync (Recipe recipe);
+        Task<Recipe> UpdateRecipeAsync (Recipe recipe, string imagePath = null);
+        Task DeletePictureFileAsync(string recipeId, string rootPath);
     }
 }
