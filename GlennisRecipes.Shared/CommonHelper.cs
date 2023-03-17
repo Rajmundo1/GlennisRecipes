@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net;
+using System;
 
 namespace GlennisRecipes.Shared
 {
@@ -15,6 +17,8 @@ namespace GlennisRecipes.Shared
             {
                 paginationData.Page = (itemCount / paginationData.ItemPerPage) + 1;
             }
+
+            paginationData.Total = itemCount;
 
             return paginationData;
         }

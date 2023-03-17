@@ -1,6 +1,7 @@
 ﻿using GlennisRecipes.Model.Entities;
 using GlennisRecipes.Model.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace GlennisRecipes.Infrastructure.Services
 {
@@ -18,7 +19,7 @@ namespace GlennisRecipes.Infrastructure.Services
 
         public async Task<User> GetCurrentUserAsync()
         {
-            var id = context.User.Claims.Single(x => x.Type == "id").Value;
+            var id = context.User.Claims.Single(x => x.Type == ClaimTypes.NameIdentifier).Value;
             return await userManager.FindByIdAsync(id);
         }
 
@@ -27,7 +28,7 @@ namespace GlennisRecipes.Infrastructure.Services
             if (context.User == null)
                 return null;
 
-            var claim = context.User.Claims.SingleOrDefault(x => x.Type == "id");
+            var claim = context.User.Claims.SingleOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
             if (claim != null)
                 return claim.Value;
 

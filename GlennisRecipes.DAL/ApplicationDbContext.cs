@@ -20,14 +20,15 @@ namespace GlennisRecipes.DAL
         public DbSet<UserComment> UserComments { get; set; }
         public DbSet<UserRating> UserRatings { get; set; }
 
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
+        //public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        //{
 
-        }
+        //}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.EnableSensitiveDataLogging();
+            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB; Database=GlennisRecipes; Integrated Security=True; Connect Timeout=180");
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -52,9 +53,9 @@ namespace GlennisRecipes.DAL
             {
                 Id = "a8b93270-4150-4411-a54b-6521de4a49aa",
                 Email = "chefjoe@mail.com",
-                NormalizedEmail = "chefjoe@mail.com",
+                NormalizedEmail = "CHEFJOE@MAIL.COM",
                 UserName = "Chef Joe",
-                NormalizedUserName = "Chef Joe",
+                NormalizedUserName = "CHEF JOE",
             };
             chefJoeUser.PasswordHash = passwordHasher.HashPassword(chefJoeUser, "Password1$");
 
@@ -62,9 +63,9 @@ namespace GlennisRecipes.DAL
             {
                 Id = "81139b48-6c24-4fc8-ad72-6c1423608d83",
                 Email = "bakerpeter@mail.com",
-                NormalizedEmail = "bakerpeter@mail.com",
+                NormalizedEmail = "BAKERPETER@MAIL.COM",
                 UserName = "Baker Peter",
-                NormalizedUserName = "Baker Peter",
+                NormalizedUserName = "BAKER PETER",
             };
             bakerPeterUser.PasswordHash = passwordHasher.HashPassword(bakerPeterUser, "Password1$");
 
@@ -72,9 +73,9 @@ namespace GlennisRecipes.DAL
             {
                 Id = "b295bea7-efc3-42a7-8e26-ea3fd5c99ec6",
                 Email = "jake@mail.com",
-                NormalizedEmail = "jake@mail.com",
+                NormalizedEmail = "JAKE@MAIL.COM",
                 UserName = "Jake",
-                NormalizedUserName = "Jake",
+                NormalizedUserName = "JAKE",
             };
             jakeUser.PasswordHash = passwordHasher.HashPassword(jakeUser, "Password1$");
 
@@ -82,9 +83,9 @@ namespace GlennisRecipes.DAL
             {
                 Id = "7a0f0fc8-de75-4231-bca4-f02595b8fc22",
                 Email = "jill@mail.com",
-                NormalizedEmail = "jill@mail.com",
+                NormalizedEmail = "JILL@MAIL.COM",
                 UserName = "Jill",
-                NormalizedUserName = "Jill",
+                NormalizedUserName = "JILL",
             };
             jillUser.PasswordHash = passwordHasher.HashPassword(jillUser, "Password1$");
 
@@ -160,8 +161,9 @@ namespace GlennisRecipes.DAL
                 Id = "6d721ff4-8c3e-4d01-9ae9-a80310ecd988",
                 Comment = "This cake was amazing !!!!!",
                 RecipeId = redVelvetCake.Id,
-                UserId = jakeUser.Id
-            };
+                UserId = jakeUser.Id,
+                TimeStamp = DateTime.Parse("3/15/2023 10:37:50 PM"),
+        };
 
             var normalRole = new IdentityRole
             {

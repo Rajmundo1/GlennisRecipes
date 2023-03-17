@@ -36,7 +36,7 @@ builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
 
 builder.Services.AddAutoMapper(typeof(MapperProfiles));
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("GlennisRecipesDb")));
+builder.Services.AddDbContext<ApplicationDbContext>();
 
 builder.Services.AddScoped<IUserStore<User>, ApplicationUserStore>();
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -51,29 +51,9 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap = new Dictionary<string, string>();
 
-builder.Services
-    .AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer("Normal", cfg =>
-    {
-        cfg.RequireHttpsMetadata = false;
-        cfg.SaveToken = true;
-        cfg.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration.GetSection("Authentication")["JwtNormal"],
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration.GetSection("Authentication")["JwtNormal"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Authentication")["JwtKey"])),
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero // remove delay of token when expire
-        };
-    });
+builder.Services.AddAuthentication();
 
 builder.Services
     .AddAuthorization(options =>
@@ -84,6 +64,7 @@ builder.Services
             .RequireClaim(JwtClaimTypes.Role, "Normal")
             .Build());
     });
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -119,12 +100,8 @@ app.UseSerilogRequestLogging(options =>
 });
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-    Path.Combine(builder.Environment.ContentRootPath, "wwwroot/images")),
-    RequestPath = "/images"
-});
+
+app.UseStaticFiles();
 
 app.UseRouting();
 
@@ -133,6 +110,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Recipes}/{action=Index}/{id?}");
 
 app.Run();

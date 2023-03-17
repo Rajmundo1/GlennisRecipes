@@ -1,0 +1,39 @@
+﻿@model GlennisRecipes.BLL.ViewModels.RecipeEditViewModel
+@using System.Web
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Recipe</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" enctype="multipart/form-data" name="edit-form">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="InstructionTextArea">Instructions</label>
+                <textarea asp-for="Instructions" class="form-control" rows="4" style="background: #fff;"></textarea>
+                <span asp-validation-for="Instructions" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label name="file" class="control-label"></label>
+                <input type="file" name="file" class="form-control" />
+            </div>
+            <div class="form-group my-4">
+                <input type="submit" value="Edit" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

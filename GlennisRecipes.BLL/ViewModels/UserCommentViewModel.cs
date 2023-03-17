@@ -4,17 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GlennisRecipes.Model.Entities
+namespace GlennisRecipes.BLL.ViewModels
 {
-    public class UserComment
+    public class UserCommentViewModel
     {
         public string Id { get; set; }
         public string Comment { get; set; }
+        public string OwnerName { get; set; }
         public DateTime TimeStamp { get; set; }
-        public User User { get; set; }
-        public string UserId { get; set; }
-        public Recipe Recipe { get; set; }
-        public string RecipeId { get; set; }
-
     }
 }

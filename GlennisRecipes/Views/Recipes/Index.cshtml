@@ -1,0 +1,31 @@
+﻿@model IEnumerable<GlennisRecipes.BLL.ViewModels.RecipeViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="container py-4 py-xl-5">
+    <div class="row mb-5">
+        <div class="col-md-8 cold-xl-6 text-center mx-auto">
+            <h2>Recipes</h2>
+        </div>
+        <form id="search-form" asp-action="Index" method="get">
+            <div class="form-outline w-100 form-group">
+                <input name="searchString" class="form-control" id="searchString" style="background: #fff;" form="search-form" placeholder="Search...(@Model.Count() Recipes)"></input>
+            </div>
+        </form>
+    </div>
+    <div class="row gy-4 row-cols-1 row-colscol-md-2 row-cols-xl-3">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="card align-items-center">
+                    <img class="card-img-top-100 d-block fit-cover" style="height: 250px;" src="~/images/@item.ImagePath"/>
+                    <div class="card-body p-4">
+                        <a class="card-title" asp-action="Details" asp-route-id="@item.Id"> @item.Name </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

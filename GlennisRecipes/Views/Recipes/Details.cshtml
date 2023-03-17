@@ -1,0 +1,106 @@
+﻿@model GlennisRecipes.BLL.ViewModels.RecipeDetailsViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+@if (User.Identity.IsAuthenticated && User.Identity.Name == @Model.OwnerName)
+{
+    <a asp-action="Edit" asp-route-id=@Model.Id>Edit</a>    
+}
+
+
+<div>
+    <hr />
+
+    <div class="d-flex flex-column justify-content-center h-100">
+        <div class="container">
+            <div class="row mb-5">
+                <img class="col-md-8 col-xl-6 text-center mx-auto" style="height: 300px; width: 400px" src="~/images/@Model.ImagePath"/>
+            </div>
+        </div>
+        <div class="d-flex align-items-center p-5 mx-auto">
+            <div class="px-5">
+                <h6 class="mb-0">
+                    Name:
+                </h6>
+                <p class="mb-0">@Model.Name</p>
+            </div>
+            <div class="px-5">
+                <h6 class="mb-0">
+                    Created by:
+                </h6>
+                <p class="mb-0">@Model.OwnerName</p>
+            </div>
+            <div class="px-5">
+                <h6 class="mb-0">
+                    Instructions:
+                </h6>
+                <p class="mb-0">@Model.Instructions</p>
+            </div>
+            <div class="px-5">
+                <h6 class="mb-0">
+                    Overall Ratings:
+                </h6>
+                <p class="mb-0">@Model.OverallRatings (@Model.AllRatings)</p>
+            </div>
+            @if (User.Identity.IsAuthenticated)
+            {
+            <div class="px-5">
+                <h6 class="mb-0">
+                    Your Rating:
+                </h6>
+                <p class="mb-0">@Model.OwnRating</p>
+            </div>
+            }
+        </div>
+    </div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <form id="rating-form" asp-action="Rate" method="post" enctype="multipart/form-data" asp-route-recipeId="@Model.Id">
+            <label for="rate"> Rate: </label>
+            <select name="rate" id="rate">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+            <input type="submit" value="Rate"/>
+        </form>
+        <div class="pb-5">
+            <form id="comment-form" asp-action="Comment" method="post" enctype="multipart/form-data" asp-route-recipeId="@Model.Id">
+                <div class="form-outline w-100 form-group">
+                    <label class="form-label" for="commentTextArea">Comment:</label>
+                    <textarea name="comment" class="form-control" id="commentTextArea" rows="4" style="background: #fff;" form="comment-form"></textarea>
+                </div>
+                <div class=" mt-2 pt-1">
+                    <input type="submit" value="Comment"/>
+                </div>
+            </form>
+        </div>
+    }
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Comment</th>
+                    <th>Time Stamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in @Model.UserComments)
+                {
+                    <tr>
+                        <td>@item.OwnerName</td>
+                        <td>@item.Comment</td>
+                        <td>@item.TimeStamp</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+

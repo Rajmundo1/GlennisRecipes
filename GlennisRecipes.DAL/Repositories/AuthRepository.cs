@@ -45,6 +45,8 @@ namespace GlennisRecipes.DAL.Repositories
                 Id = Guid.NewGuid().ToString(),
                 UserName = registerData.UserName,
                 NormalizedUserName = registerData.UserName,
+                Email = registerData.Email,
+                NormalizedEmail = registerData.Email,
             };
             try
             {
@@ -85,7 +87,7 @@ namespace GlennisRecipes.DAL.Repositories
 
             if (userToFind == null)
             {
-                throw new EntityNotFoundException($"User was not found with ID: {userId}");
+                throw new DbException($"User was not found with ID: {userId}");
             }
 
             userToFind.RefreshToken = refreshToken;

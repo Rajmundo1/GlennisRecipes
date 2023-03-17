@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GlennisRecipes.Model.DataTransferModels
+namespace GlennisRecipes.BLL.ViewModels
 {
-    public class RegisterData
+    public class LoginViewModel
     {
-        public string UserName { get; set; }
-        public string Password { get; set; }
         public string Email { get; set; }
+        public string Password { get; set; }
     }
 }
