@@ -46,28 +46,42 @@ namespace GlennisRecipes.Controllers
         //GET: Recipes
         public async Task<IActionResult> Index(string searchString)
         {
-            var recipes = await recipeAppService.GetRecipesAsync(new PaginationData { ItemPerPage = 100, Page = 1 }, searchString);
-            return View(recipes.Item1);
+            try
+            {
+                var recipes = await recipeAppService.GetRecipesAsync(new PaginationData { ItemPerPage = 1000, Page = 1 }, searchString);
+                return View(recipes.Item1);
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error", new ErrorViewModel { Message = ex.Message });
+            }
         }
 
         // GET: Recipes/Details/5
         public async Task<IActionResult> Details(string id)
         {
-            string userId;
-            if (User != null && User.Identity != null && User.Identity.IsAuthenticated)
+            try
             {
-                userId = await identityService.GetCurrentUserIdAsync();
-            }
-            else
-                userId = null;
-            var recipe = await recipeAppService.GetRecipeDetailsAsync(id, userId);
+                string userId;
+                if (User != null && User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    userId = await identityService.GetCurrentUserIdAsync();
+                }
+                else
+                    userId = null;
+                var recipe = await recipeAppService.GetRecipeDetailsAsync(id, userId);
 
-            if (recipe == null)
+                if (recipe == null)
+                {
+                    return NotFound();
+                }
+
+                return View(recipe);
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return RedirectToAction("Error", new ErrorViewModel { Message = ex.Message });
             }
-
-            return View(recipe);
         }
 
         [Authorize]
@@ -85,21 +99,27 @@ namespace GlennisRecipes.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name,Instructions")] CreateRecipeViewModel recipe, IFormFile file)
         {
-
-            if (ModelState.IsValid && file != null && file.Length > 0 && file.ContentType.Contains("image"))
+            try
             {
-                var fileName = Guid.NewGuid().ToString() + file.FileName;
-                var filePath = Path.Combine(webHostEnvironment.WebRootPath, "images", fileName);
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                if (ModelState.IsValid && file != null && file.Length > 0 && file.ContentType.Contains("image"))
                 {
-                    await file.CopyToAsync(fileStream);
-                }
+                    var fileName = Guid.NewGuid().ToString() + file.FileName;
+                    var filePath = Path.Combine(webHostEnvironment.WebRootPath, "images", fileName);
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
 
-                var userId = await identityService.GetCurrentUserIdAsync();
-                await recipeAppService.CreateNewRecipeAsync(recipe, userId, fileName);
-                return RedirectToAction(nameof(Index));
+                    var userId = await identityService.GetCurrentUserIdAsync();
+                    await recipeAppService.CreateNewRecipeAsync(recipe, userId, fileName);
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(recipe);
             }
-            return View(recipe);
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error", new ErrorViewModel { Message = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -107,9 +127,16 @@ namespace GlennisRecipes.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Rate(string recipeId, int rate)
         {
-            var userId = await identityService.GetCurrentUserIdAsync();
-            await recipeAppService.RateRecipe(userId, recipeId, (RatingEnum)rate);
-            return RedirectToAction("Details", new { id = recipeId });
+            try
+            {
+                var userId = await identityService.GetCurrentUserIdAsync();
+                await recipeAppService.RateRecipe(userId, recipeId, (RatingEnum)rate);
+                return RedirectToAction("Details", new { id = recipeId });
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error", new ErrorViewModel { Message = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -117,30 +144,45 @@ namespace GlennisRecipes.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Comment(string recipeId, string comment)
         {
-            if (string.IsNullOrEmpty(comment))
+            try
             {
+                if (string.IsNullOrEmpty(comment))
+                {
+                    return RedirectToAction("Details", new { id = recipeId });
+                }
+                var userId = await identityService.GetCurrentUserIdAsync();
+                await recipeAppService.CommentOnRecipe(userId, recipeId, comment);
                 return RedirectToAction("Details", new { id = recipeId });
             }
-            var userId = await identityService.GetCurrentUserIdAsync();
-            await recipeAppService.CommentOnRecipe(userId, recipeId, comment);
-            return RedirectToAction("Details", new { id = recipeId });
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error", new ErrorViewModel { Message = ex.Message });
+            }
         }
 
         // GET: Recipes/Edit/5
         [Authorize]
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                if (id == null)
+                {
+                    return NotFound();
+                }
 
-            var recipeDetails = await recipeAppService.GetRecipeDetailsAsync(id);
-            if (recipeDetails == null)
-            {
-                return NotFound();
+                var recipeDetails = await recipeAppService.GetRecipeDetailsAsync(id);
+                if (recipeDetails == null)
+                {
+                    return NotFound();
+                }
+
+                return View(mapper.Map<RecipeEditViewModel>(recipeDetails));
             }
-            return View(mapper.Map<RecipeEditViewModel>(recipeDetails));
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error", new ErrorViewModel { Message = ex.Message });
+            }
         }
 
         // POST: Recipes/Edit/5
@@ -151,28 +193,35 @@ namespace GlennisRecipes.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, [Bind("Name,Instructions")] RecipeEditViewModel recipeEditViewModel, IFormFile file)
         {
-            var modelStates = ModelState.Values.ToList();
-            if (modelStates[0].ValidationState == ModelValidationState.Valid &&
-                modelStates[2].ValidationState == ModelValidationState.Valid &&
-                modelStates[3].ValidationState == ModelValidationState.Valid)
+            try
             {
-                if(file != null && file.Length > 0 && file.ContentType.Contains("image"))
+                var modelStates = ModelState.Values.ToList();
+                if (modelStates[0].ValidationState == ModelValidationState.Valid &&
+                    modelStates[2].ValidationState == ModelValidationState.Valid &&
+                    modelStates[3].ValidationState == ModelValidationState.Valid)
                 {
-                    var fileName = Guid.NewGuid().ToString() + file.FileName;
-                    var filePath = Path.Combine(webHostEnvironment.WebRootPath, "images", fileName);
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    if(file != null && file.Length > 0 && file.ContentType.Contains("image"))
                     {
-                        await file.CopyToAsync(fileStream);
+                        var fileName = Guid.NewGuid().ToString() + file.FileName;
+                        var filePath = Path.Combine(webHostEnvironment.WebRootPath, "images", fileName);
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await file.CopyToAsync(fileStream);
+                        }
+                        var rootPath = Path.Combine(webHostEnvironment.WebRootPath, "images");
+                        await recipeAppService.DeletePictureFileAsync(id, rootPath);
+                        await recipeAppService.UpdateRecipeAsync(id, recipeEditViewModel, fileName);
+                        return RedirectToAction(nameof(Index));
                     }
-                    var rootPath = Path.Combine(webHostEnvironment.WebRootPath, "images");
-                    await recipeAppService.DeletePictureFileAsync(id, rootPath);
-                    await recipeAppService.UpdateRecipeAsync(id, recipeEditViewModel, fileName);
+                    await recipeAppService.UpdateRecipeAsync(id, recipeEditViewModel);
                     return RedirectToAction(nameof(Index));
                 }
-                await recipeAppService.UpdateRecipeAsync(id, recipeEditViewModel);
-                return RedirectToAction(nameof(Index));
+                return View(recipeEditViewModel);
             }
-            return View(recipeEditViewModel);
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error", new ErrorViewModel { Message = ex.Message });
+            }
         }
 
         public IActionResult Login()
@@ -184,12 +233,25 @@ namespace GlennisRecipes.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login([Bind("Email,Password")] LoginViewModel loginViewModel)
         {
-            if (ModelState.IsValid)
+            try
             {
-                await authAppService.Login(loginViewModel);
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    await authAppService.Login(loginViewModel);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(loginViewModel);
             }
-            return View(loginViewModel);
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error", new ErrorViewModel { Message = ex.Message });
+            }
+        }
+
+        public IActionResult Error(ErrorViewModel errorViewModel)
+        {
+            return View(errorViewModel);
         }
 
         public IActionResult Register()
@@ -201,20 +263,36 @@ namespace GlennisRecipes.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register([Bind("UserName,Email,Password")]RegisterViewModel registerViewModel)
         {
-            if (ModelState.IsValid)
+            try
             {
-                await authAppService.Register(registerViewModel);
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    await authAppService.Register(registerViewModel);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(registerViewModel);
             }
-            return View(registerViewModel);
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error", new ErrorViewModel { Message = ex.Message });
+            }
         }
 
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Logout()
         {
-            await authAppService.Logout();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await authAppService.Logout();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error", new ErrorViewModel { Message = ex.Message });
+            }
+
         }
 
         #region Delete Auto Generated
